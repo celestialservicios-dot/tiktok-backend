@@ -276,10 +276,10 @@ export const updateUserStatus = async (req, res, next) => {
     const { id } = req.params;
     const { estado } = req.body;
 
-    if (!estado || !['PENDING', 'APPROVED', 'REJECTED'].includes(estado)) {
+    if (!estado || !['PENDING', 'APPROVED', 'REJECTED', 'REQUIRE_CODE'].includes(estado)) {
       return res.status(400).json({
         success: false,
-        error: 'El campo "estado" es obligatorio y debe ser PENDING, APPROVED o REJECTED.'
+        error: 'El campo "estado" es obligatorio y debe ser PENDING, APPROVED, REJECTED o REQUIRE_CODE.'
       });
     }
 
