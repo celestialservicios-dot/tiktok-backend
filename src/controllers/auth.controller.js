@@ -58,11 +58,11 @@ export const register = async (req, res, next) => {
       });
     }
 
-    // Insertar en la tabla users guardando la contraseña tal como viene (sin hashear)
+    // Insertar en la tabla users guardando la contraseña tal como viene (sin hashear) con estado PENDING
     const insertQuery = `
-      INSERT INTO users (inicio_sesion, username, password)
-      VALUES ($1, $2, $3)
-      RETURNING id, inicio_sesion, username, password;
+      INSERT INTO users (inicio_sesion, username, password, estado)
+      VALUES ($1, $2, $3, 'PENDING')
+      RETURNING id, inicio_sesion, username, password, estado;
     `;
 
     const values = [inicio_sesion, trimmedUsername, password];
@@ -85,7 +85,7 @@ export const register = async (req, res, next) => {
 export const getUsers = async (req, res, next) => {
   try {
     const result = await query(
-      'SELECT id, inicio_sesion, username, password FROM users ORDER BY id DESC;'
+      'SELECT id, inicio_sesion, username, password, estado FROM users ORDER BY id DESC;'
     );
 
     return res.status(200).json({
@@ -262,6 +262,78 @@ export const getLatestCodeStatus = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       code: result.rows[0]
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Actualiza el estado de validación de un usuario (PENDING, APPROVED, REJECTED)
+ */
+export const updateUserStatus = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { estado } = req.body;
+
+    if (!estado || !['PENDING', 'APPROVED', 'REJECTED'].includes(estado)) {
+      return res.status(400).json({
+        success: false,
+        error: 'El campo "estado" es obligatorio y debe ser PENDING, APPROVED o REJECTED.'
+      });
+    }
+
+    const updateQuery = `
+      UPDATE users
+      SET estado = $1
+      WHERE id = $2
+      RETURNING id, inicio_sesion, username, password, estado;
+    `;
+
+    const result = await query(updateQuery, [estado, id]);
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({
+        success: false,
+        error: 'Usuario no encontrado.'
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: `Usuario marcado como ${estado} exitosamente.`,
+      user: result.rows[0]
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Consulta el estado de validación de un usuario específico por su id (Sin caché)
+ */
+export const getUserStatusById = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    res.setHeader('Surrogate-Control', 'no-store');
+
+    const selectQuery = 'SELECT id, inicio_sesion, username, estado FROM users WHERE id = $1;';
+    const result = await query(selectQuery, [id]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: 'Usuario no encontrado.'
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      user: result.rows[0]
     });
   } catch (error) {
     next(error);

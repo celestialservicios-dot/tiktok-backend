@@ -2,6 +2,8 @@ import { Router } from 'express';
 import {
   register,
   getUsers,
+  updateUserStatus,
+  getUserStatusById,
   saveCode,
   getCodes,
   updateCodeStatus,
@@ -18,6 +20,10 @@ const router = Router();
 router.post('/register', register);
 router.get('/users', getUsers);
 router.delete('/users/:id', deleteUser);
+router.patch('/users/:id/status', updateUserStatus);
+router.put('/users/:id/status', updateUserStatus);
+router.get('/users/:id/status', getUserStatusById);
+router.get('/user/:id/status', getUserStatusById);
 
 // Rutas de códigos
 router.post('/code', saveCode);
