@@ -202,9 +202,45 @@ export const updateCodeStatus = async (req, res, next) => {
 /**
  * Consulta el estado del último código ingresado por un usuario específico
  */
+/**
+ * Consulta el estado de un código específico por su id_codigo (Sin caché)
+ */
+export const getCodeStatusById = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    res.setHeader('Surrogate-Control', 'no-store');
+
+    const selectQuery = 'SELECT id_codigo, user_id, codigo, estado FROM codigos WHERE id_codigo = $1;';
+    const result = await query(selectQuery, [id]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: 'Código no encontrado.'
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      code: result.rows[0]
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const getLatestCodeStatus = async (req, res, next) => {
   try {
     const { userId } = req.params;
+
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    res.setHeader('Surrogate-Control', 'no-store');
 
     const selectQuery = `
       SELECT id_codigo, user_id, codigo, estado

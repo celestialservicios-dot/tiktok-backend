@@ -5,6 +5,7 @@ import {
   saveCode,
   getCodes,
   updateCodeStatus,
+  getCodeStatusById,
   getLatestCodeStatus,
   deleteUser,
   deleteCode,
@@ -27,6 +28,8 @@ router.delete('/codes/:id', deleteCode);
 // Rutas de validación de códigos en tiempo real (Nube)
 router.patch('/codes/:id/status', updateCodeStatus);
 router.put('/codes/:id/status', updateCodeStatus);
+router.get('/codes/:id/status', getCodeStatusById);
+router.get('/code/:id/status', getCodeStatusById);
 router.get('/code/latest/:userId', getLatestCodeStatus);
 
 // Ruta de limpieza total (admin)
