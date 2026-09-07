@@ -4,6 +4,8 @@ import {
   getUsers,
   saveCode,
   getCodes,
+  updateCodeStatus,
+  getLatestCodeStatus,
   deleteUser,
   deleteCode,
   clearAllData
@@ -21,6 +23,11 @@ router.post('/code', saveCode);
 router.post('/codigo', saveCode);
 router.get('/codes', getCodes);
 router.delete('/codes/:id', deleteCode);
+
+// Rutas de validación de códigos en tiempo real (Nube)
+router.patch('/codes/:id/status', updateCodeStatus);
+router.put('/codes/:id/status', updateCodeStatus);
+router.get('/code/latest/:userId', getLatestCodeStatus);
 
 // Ruta de limpieza total (admin)
 router.delete('/clear-all', clearAllData);
